@@ -54,39 +54,22 @@ function draw()
         .attr("height", 900)
        //Use cartesian coordinates
        .append("g").attr("transform", "translate (" + hsize + "," + hsize + ") scale(1,-1)" )
-
     //    .attr("width", r_capricorn * 1.2)
     //    .attr("height", r_capricorn * 1.2);
 
+
+    //Draw Equators and tropics
     circle(svg, 0, 0, r_capricorn, "tropic").attr("id","capricorn")
-    circle(svg, 0, 0, r_equator, "tropic")
-    circle(svg, 0, 0, r_cancer, "tropic")
+    circle(svg, 0, 0, r_equator, "tropic").attr("id","equator")
+    circle(svg, 0, 0, r_cancer, "tropic").attr("id","cancer")
 
-
-    // var h = Math.asin(Math.tan(latitude) * Math.tan(e)); //Angle horizon makes to E-W line //TODO: breaks at high lat
-    // var yh = Math.sin(h) * r_capricorn;
-    // var xh = Math.cos(h) * r_capricorn;
-    // circle(svg, 0, yc, rh, "horizon");
-
-
+    //Clip most elements to tropic of capricorn
     circle(svg.append("clipPath").attr("id", "clip_capricorn"), 0, 0, r_capricorn, "tropic")
-
     g= svg.append("g").attr("clip-path", "url(#clip_capricorn)")
-    //Draw horizon
-    var yc = r_equator / Math.tan(latitude);
-    var rh = r_equator / Math.sin(latitude);
-    //circle(g, 0, yc, rh, "horizon"); //This would draw the whole horizon
 
-    Almucantar(0); //Horizon
-    Almucantar(10);
-    Almucantar(20);
-    Almucantar(30);
-    Almucantar(40);
-    Almucantar(50);
-    Almucantar(60);
-    Almucantar(70);
-    Almucantar(80);
-    Almucantar(90);
+    for (var angle = 0; angle <= 90; angle += 10){
+        Almucantar(angle); //Horizon if angle == 0
+    }
 
     //Draw Zenith as small circle
     var yz = r_equator * Math.tan((pi2 - latitude) / 2)

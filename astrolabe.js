@@ -34,14 +34,14 @@ function circle(elem, cx, cy, r, class_name)
 }
 
 //Draw almucantar circle given degrees
-function Almucantar(a)
+function Almucantar(a, elem)
 {
     a_rad = a * (Math.PI / 180)
     tmp = r_equator / (Math.sin(latitude) + Math.sin(a_rad));
     ra = Math.cos(a_rad)     * tmp;
     ya = Math.cos(latitude)  * tmp;
     // svg.circle( size / 2 , CartesianToScreenY(ya), ra);
-    circle(g, 0, ya, ra, "almucantar");
+    circle(elem, 0, ya, ra, "almucantar");
 }
 
 //Draw whole astrolabe
@@ -68,7 +68,7 @@ function draw()
     g= svg.append("g").attr("clip-path", "url(#clip_capricorn)")
 
     for (var angle = 0; angle <= 90; angle += 10){
-        Almucantar(angle); //Horizon if angle == 0
+        Almucantar(angle, g); //Horizon if angle == 0
     }
 
     //Draw Zenith as small circle

@@ -24,28 +24,39 @@ function deg_to_rad(deg)
     return deg * (Math.PI / 180)
 }
 
-// D3 circle
-function circle(elem, cx, cy, r, class_name)
+//
+function circle(x,y,r)
+{
+    this.x = x;
+    this.y = y;
+    this.r = r;
+}
+
+circle.prototype.draw = function(elem, class_name)
 {
     return elem.append("circle")
-        .attr("cx", cx)
-        .attr("cy", cy)
-        .attr("r", r)
+        .attr("cx", this.x)
+        .attr("cy", this.y)
+        .attr("r",  this.r)
         .attr("class", class_name)
         .attr("fill", "none")
         .attr("stroke", "black")
         .attr("stroke-width", 1)
 }
 
-//Draw almucantar circle given degrees
-function Almucantar(a, elem)
+function draw_circle(elem, x, y, r, class_name)
+{
+    return (new circle(x,y,r)).draw(elem, class_name)
+}
+
+//Calculate almucantars
+function Almucantar(a)
 {
     a_rad = deg_to_rad(a)
     tmp = r_equator / (Math.sin(latitude) + Math.sin(a_rad));
     ra = Math.cos(a_rad)     * tmp;
     ya = Math.cos(latitude)  * tmp;
-    // svg.circle( size / 2 , CartesianToScreenY(ya), ra);
-    circle(elem, 0, ya, ra, "almucantar");
+    return new circle(0, ya, ra);
 }
 
 //Draw azimuthal arc given degrees
@@ -58,13 +69,11 @@ function azimuthal_arc(a, elem)
     yaz = yz - yc
     xa = yaz * Math.tan(a)
     ra = yaz / Math.cos(a)
-    circle(elem, xa, yc, ra, "azimuthal")
-    circle(elem, -xa, yc, ra, "azimuthal")
-    console.log("" + xa + "," + ya + " " + ra)
+    return new circle(xa, yc, ra)
 }
 
 //Draw whole astrolabe
-function draw()
+function astrolabe()
 {
     var svg = d3.select("body")
        .append("svg:svg")
@@ -79,25 +88,31 @@ function draw()
 
 
     //Draw Equators and tropics
-    circle(svg, 0, 0, r_capricorn, "tropic").attr("id","capricorn")
-    circle(svg, 0, 0, r_equator, "tropic").attr("id","equator")
-    circle(svg, 0, 0, r_cancer, "tropic").attr("id","cancer")
+    capricorn = new circle(0, 0, r_capricorn)
+    capricorn.draw(svg, "tropic").attr("id", "capricorn");
+    draw_circle(svg, 0, 0, r_equator, "tropic").attr("id","equator")
+    draw_circle(svg, 0, 0, r_cancer, "tropic").attr("id","cancer")
 
     //Clip most elements to tropic of capricorn
-    circle(svg.append("clipPath").attr("id", "clip_capricorn"), 0, 0, r_capricorn, "tropic")
-    g= svg.append("g").attr("clip-path", "url(#clip_capricorn)")
+    capricorn.draw(svg.append("clipPath").attr("id", "clip_capricorn"), "tropic")
+    g = svg.append("g").attr("clip-path", "url(#clip_capricorn)")
 
     for (var angle = 0; angle <= 90; angle += 10){
-        Almucantar(angle, g); //Horizon if angle == 0
+        Almucantar(angle).draw(g, "almucantar"); //Horizon if angle == 0
     }
 
     for (var angle = 0; angle <= 90; angle += 10){
-        azimuthal_arc(angle, g);
+        c=azimuthal_arc(angle);
+        c.draw(g, "azimuth");
+        c.x = -c.x;
+        c.draw(g, "azimuth");
     }
 
     //Draw Zenith as small circle
     var yz = r_equator * Math.tan((pi2 - latitude) / 2)
-    circle(svg, 0, yz, 5, "zenith");
+    draw_circle(svg, 0, yz, 5, "zenith");
+
+    return svg;
 }
 
-draw()
+svg = astrolabe()

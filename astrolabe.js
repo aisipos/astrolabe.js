@@ -83,8 +83,6 @@ function astrolabe()
        //Use cartesian coordinates
        //(0,0) represents the north celestial pole.
        .append("g").attr("transform", "translate (" + hsize + "," + hsize + ") scale(1,-1)" )
-    //    .attr("width", r_capricorn * 1.2)
-    //    .attr("height", r_capricorn * 1.2);
 
 
     //Draw Equators and tropics
@@ -93,24 +91,37 @@ function astrolabe()
     draw_circle(svg, 0, 0, r_equator, "tropic").attr("id","equator")
     draw_circle(svg, 0, 0, r_cancer, "tropic").attr("id","cancer")
 
-    //Clip most elements to tropic of capricorn
-    capricorn.draw(svg.append("clipPath").attr("id", "clip_capricorn"), "tropic")
-    g = svg.append("g").attr("clip-path", "url(#clip_capricorn)")
-
-    for (var angle = 0; angle <= 90; angle += 10){
-        Almucantar(angle).draw(g, "almucantar"); //Horizon if angle == 0
-    }
-
-    for (var angle = 0; angle <= 90; angle += 10){
-        c=azimuthal_arc(angle);
-        c.draw(g, "azimuth");
-        c.x = -c.x;
-        c.draw(g, "azimuth");
-    }
-
     //Draw Zenith as small circle
     var yz = r_equator * Math.tan((pi2 - latitude) / 2)
-    draw_circle(svg, 0, yz, 5, "zenith");
+    zenith = new circle(0, yz, 5)
+    zenith.draw(svg, "zenith")
+
+    horizon = Almucantar(0)
+
+    //Clip most elements to tropic of capricorn, horizon, and zenith
+    capricorn_clip_path = svg.append("clipPath").attr("id", "clip_capricorn")
+    capricorn.draw(capricorn_clip_path, "tropic")
+
+    horizon_clip_path = svg.append("clipPath").attr("id", "clip_horizon")
+    horizon.draw(horizon_clip_path, "horizon")
+    //sky = svg.append("g").attr("clip-path", "url(#clipsky)")
+    capricorn_clipped = svg.append("g").attr("style", "clip-path: url(#clip_capricorn);")
+    sky_clipped = capricorn_clipped.append("g").attr("style", "clip-path: url(#clip_horizon);")
+
+    //Draw horizon
+    horizon.draw(sky_clipped, "horizon")
+
+    for (var angle = 5; angle <= 90; angle += 5){
+        Almucantar(angle).draw(sky_clipped, "almucantar");
+    }
+
+    for (var angle = 0; angle <= 90; angle += 5){
+        c=azimuthal_arc(angle);
+        c.draw(sky_clipped, "azimuth");
+        c.x = -c.x;
+        c.draw(sky_clipped, "azimuth");
+    }
+
 
     return svg;
 }

@@ -111,16 +111,16 @@ function astrolabe()
     //Draw horizon
     horizon.draw(sky_clipped, "horizon")
 
-    for (var angle = 5; angle <= 90; angle += 5){
-        Almucantar(angle).draw(sky_clipped, "almucantar");
-    }
+    // Draw almucantars from 5 to 95 degrees
+    d3.range(5,95,5).forEach(function f(angle) {Almucantar(angle).draw(sky_clipped, "almucantar");});
 
-    for (var angle = 0; angle <= 90; angle += 5){
+    //Draw azimuthal arcs from 0 to 90 degrees
+    d3.range(0,95,5).forEach(function f(angle){
         c=azimuthal_arc(angle);
         c.draw(sky_clipped, "azimuth");
         c.x = -c.x;
         c.draw(sky_clipped, "azimuth");
-    }
+     });
 
 
     return svg;
